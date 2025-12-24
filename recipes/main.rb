@@ -4,7 +4,7 @@
 #
 # Copyright:: 2024, ExampleCorp
 
-#include_recipe 'customization::default'
+# include_recipe 'customization::default'
 include_recipe '::docker'
 include_recipe '::hosts'
 include_recipe '::templates'
