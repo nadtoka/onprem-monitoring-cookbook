@@ -1,0 +1,99 @@
+groups:
+  - name: alert_rules
+    rules:
+      - alert: HostOutOfDiskSpace
+        expr: round(node_filesystem_avail_bytes{fstype=~"ext.*|xfs", mountpoint !~".*pod.*"}/node_filesystem_size_bytes{fstype=~"ext.*|xfs", mountpoint !~".*pod.*"}*100,0.01) < 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Host running out of disk space (instance {{ $labels.instance }})"
+          description: "Partition {{ $labels.mountpoint }} is almost full {{ $value }}%,"
+      - alert: HostUnusualDiskReadRate
+        expr: sum by (instance) (rate(node_disk_read_bytes_total[2m])) / 1024 / 1024 > 50
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Host unusual disk read rate (instance {{ $labels.instance }})"
+          description: "Disk is probably reading too much data (> 50 MB/s)\n  VALUE = {{ $value }}"
+      - alert: HostUnusualDiskWriteRate
+        expr: sum by (instance) (rate(node_disk_written_bytes_total[2m])) / 1024 / 1024 > 50
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Host unusual disk write rate (instance {{ $labels.instance }})"
+          description: "Disk is probably writing too much data (> 50 MB/s)\n  VALUE = {{ $value }}"
+      - alert: HostOutOfMemory
+        expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Host out of memory (instance {{ $labels.instance }})"
+          description: "Node memory is filling up (< 5% left)\n  VALUE = {{ $value }}"
+      - alert: HostMemoryUnderMemoryPressure
+        expr: rate(node_vmstat_pgmajfault[1m]) > 1000
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Host memory under memory pressure (instance {{ $labels.instance }})"
+          description: "The node is under heavy memory pressure. High rate of major page faults\n  VALUE = {{ $value }}"
+      - alert: HostOomKillDetected
+        expr: increase(node_vmstat_oom_kill[1m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Host OOM kill detected (instance {{ $labels.instance }})"
+          description: "OOM kill detected\n  VALUE = {{ $value }}"
+      - alert: HostUnusualNetworkThroughputIn
+        expr: sum by (instance) (rate(node_network_receive_bytes_total[2m])) / 1024 / 1024 > 100
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Host unusual network throughput in (instance {{ $labels.instance }})"
+          description: "Host network interfaces are probably receiving too much data (> 100 MB/s)\n  VALUE = {{ $value }}"
+      - alert: HostUnusualNetworkThroughputOut
+        expr: sum by (instance) (rate(node_network_transmit_bytes_total[2m])) / 1024 / 1024 > 100
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Host unusual network throughput out (instance {{ $labels.instance }})"
+          description: "Host network interfaces are probably sending too much data (> 100 MB/s)\n  VALUE = {{ $value }}"
+      - alert: HostOutOfInodes
+        expr: node_filesystem_files_free{mountpoint ="/rootfs"} / node_filesystem_files{mountpoint="/rootfs"} * 100 < 10 and ON (instance, device, mountpoint) node_filesystem_readonly{mountpoint="/rootfs"} == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Host out of inodes (instance {{ $labels.instance }})"
+          description: "Disk is almost running out of available inodes (< 10% left)\n  VALUE = {{ $value }}"
+      - alert: HostHighCpuLoad
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[2m])) * 100) > 95
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Host high CPU load (instance {{ $labels.instance }})"
+          description: "CPU load is > 95%\n  VALUE = {{ $value }}"
+      - alert: InstanceDown
+        expr: up == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instance {{ $labels.instance }} down"
+          description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 5 minutes."
+      - alert: ContainerNotUP
+        expr: time() - last_over_time(container_last_seen{instance=~".*",job=~".*",image!=""}[1h])  > 60
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Container is not up for more then 60 seconds (instance {{ $labels.instance }}) "
+          description: " {{ $labels.instance }}\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}."

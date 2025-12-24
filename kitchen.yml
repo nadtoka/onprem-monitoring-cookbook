@@ -1,0 +1,133 @@
+---
+driver:
+  name: static  # chef gem install kitchen-static
+
+transport:
+  name: ssh
+  username: "<%= ENV['SSH_USER'] %>"
+  ssh_key: "<%= ENV['SSH_KEY_PATH'] %>"
+  port: "<%= ENV['SSH_PORT'] %>"
+
+provisioner:
+  name: chef_zero
+  root_path: /var/tmp/kitchen
+  max_retries: 3 # tweak in conjunction with below
+  wait_for_retry: 90 # tweak based on machine shutdown speed
+  retry_on_exit_code:
+    - 35 # chef-client's reboot scheduled exit status
+  log_level: :error
+  #log_level: :debug
+  product_name: chef
+  product_version: 17
+  client_rb:
+    exit_status: :enabled # default in 13+
+    client_fork: false # don't fork so we get true exit code
+    log_level: :error
+    #log_level: :debug
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: ubuntu-20.04
+  - name: centos-7
+
+suites:
+  - name: load-balancer
+    provisioner:
+      policyfile_path: Policyfile_LB.rb
+    driver:
+      host: "<%= ENV['LB_IP'] %>"
+    verifier:
+      inspec_tests:
+        - test/integration/default
+    excludes:
+      - centos-7
+    attributes:
+      vault:
+        token:      "<%= ENV['VAULT_TOKEN'] %>"
+        secret:     "<%= ENV['VAULT_SECRET'] %>"
+        monitoring: "<%= ENV['VAULT_MONITORING_SECRET'] %>"
+        url:        "<%= ENV['VAULT_ADDR'] %>"
+      server:
+        shortname: "lb-<%= ENV['TF_VAR_stage_name'] %>"
+        fqdn:      "lb.<%= ENV['CORE_WEB_HOST'] %>"
+        cwh:       "<%= ENV['CORE_WEB_HOST'] %>"
+      docker:
+        key: "<%= ENV['DOCKERKEY'] %>"
+  - name: core
+    provisioner:
+      policyfile_path: Policyfile_CORE.rb
+    driver:
+      host: "<%= ENV['CORE_IP'] %>"
+    verifier:
+      inspec_tests:
+        - test/integration/default
+    excludes:
+      - centos-7
+    attributes:
+      vault:
+        token:      "<%= ENV['VAULT_TOKEN'] %>"
+        secret:     "<%= ENV['VAULT_SECRET'] %>"
+        url:        "<%= ENV['VAULT_ADDR'] %>"
+        monitoring: "<%= ENV['VAULT_MONITORING_SECRET'] %>"
+      server:
+        shortname: "be-<%= ENV['TF_VAR_stage_name'] %>"
+        fqdn:      "be.<%= ENV['CORE_WEB_HOST'] %>"
+      docker:
+        key: "<%= ENV['DOCKERKEY'] %>"
+  - name: db
+    provisioner:
+      policyfile_path: Policyfile_DB.rb
+    driver:
+      host: "<%= ENV['DB_IP'] %>"
+    verifier:
+      inspec_tests:
+        - test/integration/default
+    excludes:
+      - centos-7
+    attributes:
+      vault:
+        token:      "<%= ENV['VAULT_TOKEN'] %>"
+        secret:     "<%= ENV['VAULT_SECRET'] %>"
+        url:        "<%= ENV['VAULT_ADDR'] %>"
+        monitoring: "<%= ENV['VAULT_MONITORING_SECRET'] %>"
+      server:
+        shortname: "db-<%= ENV['TF_VAR_stage_name'] %>"
+        fqdn:      "db.<%= ENV['CORE_WEB_HOST'] %>"
+      docker:
+        key: "<%= ENV['DOCKERKEY'] %>"
+  - name: monitoring
+    provisioner:
+      policyfile_path: Policyfile_MONITORING.rb
+    driver:
+      host: "<%= ENV['MONITORING_IP'] %>"
+#    run_list:
+#        - recipe[monitoring::default]
+    verifier:
+      inspec_tests:
+        - test/integration/default
+    excludes:
+      - centos-7
+    attributes:
+      vault:
+        token:      "<%= ENV['VAULT_TOKEN'] %>"
+        secret:     "<%= ENV['VAULT_SECRET'] %>"
+        url:        "<%= ENV['VAULT_ADDR'] %>"
+        monitoring: "<%= ENV['VAULT_MONITORING_SECRET'] %>"
+      server:
+        cwh:       "<%= ENV['CORE_WEB_HOST'] %>"
+      docker:
+        key: "<%= ENV['DOCKERKEY'] %>"
+      fe:
+        tag: "<%= ENV['FE_TAG'] %>"
+      lb:
+        ip: "<%= ENV['LB_IP'] %>"
+      db:
+        ip: "<%= ENV['DB_IP'] %>"
+      core:
+        ip: "<%= ENV['CORE_IP'] %>"
+      mnt:
+        ip: "<%= ENV['MNT_IP'] %>"
+      monitoring:
+        ip: "<%= ENV['MONITORING_IP'] %>"

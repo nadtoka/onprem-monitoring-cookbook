@@ -1,0 +1,24 @@
+<% smtp_host = @smtp_host.to_s.empty? ? 'smtp.example.com' : @smtp_host %>
+<% smtp_port = @smtp_port.to_s.empty? ? '587' : @smtp_port %>
+<% smtp_from = @smtp_from.to_s.empty? ? 'alerts@example.com' : @smtp_from %>
+<% smtp_to = @smtp_to.to_s.empty? ? 'oncall@example.com' : @smtp_to %>
+<% smtp_username = @smtp_username.to_s.empty? ? smtp_from : @smtp_username %>
+<% smtp_password = @smtp_password.to_s.empty? ? 'change-me' : @smtp_password %>
+<% smtp_identity = @smtp_identity.to_s.empty? ? smtp_username : @smtp_identity %>
+route:
+  group_by: ['alertname']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 1h
+  receiver: devops
+receivers:
+  - name: 'devops'
+    email_configs:
+    - smarthost: <%= smtp_host %>:<%= smtp_port %>
+      from: '<%= smtp_from %>'
+      to: '<%= smtp_to %>'
+      auth_username: '<%= smtp_username %>'
+      auth_password: '<%= smtp_password %>'
+      auth_identity: '<%= smtp_identity %>'
+      require_tls: true
+      send_resolved: true

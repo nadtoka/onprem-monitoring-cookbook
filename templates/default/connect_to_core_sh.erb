@@ -1,0 +1,13 @@
+ssh <%= @core_ip %> \
+  -L 9100:127.0.0.1:9100 `# Smile CDR Web Admin` \
+  -L 8000:127.0.0.1:8000 `# Smile CDR API` \
+  -L 8001:127.0.0.1:8001 `# The FHIRWeb Console` \
+  -L 8002:127.0.0.1:8002 `# Smile CDR - Package Registry (Swagger UI)` \
+  -L 8443:127.0.0.1:8443 `# Mirth Web UI` \
+  -L 9000:127.0.0.1:9000 `# Smile CDR - JSON Admin API (Swagger UI)` \
+  -L 9200:127.0.0.1:9200 `# SMART on FHIR: Endpoints` \
+  -L 6600:127.0.0.1:6600 `# HL7 port #1` \
+  -L 6601:127.0.0.1:6601 `# HL7 port #2` \
+  -L 6602:127.0.0.1:6602 `# HL7 port #3` \
+  -L 8161:127.0.0.1:8161 `# ActiveMQ Web Console` \
+  -D 1080 `# SOCKS5 Proxy`

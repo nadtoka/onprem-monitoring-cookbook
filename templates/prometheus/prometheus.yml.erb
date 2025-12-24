@@ -1,0 +1,79 @@
+global:
+  scrape_interval:     15s # By default, scrape targets every 15 seconds.
+
+  # Attach these labels to any time series or alerts when communicating with
+  # external systems (federation, remote storage, Alertmanager).
+  external_labels:
+    monitor: 'monitoring-cluster'
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: 'prometheus'
+    # Override the global default and scrape targets from this job every 5 seconds.
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['localhost:9090','lb:9900','db:9900', 'core:9900']
+
+  - job_name: 'cadvisor'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['lb:4194','db:4194', 'core:4194']
+
+  - job_name: 'postgres'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['db:9187']
+  - job_name: 'blackbox-open-api-endpoints'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]  # pointingto open blackbox module
+    static_configs:
+      - targets:
+        - http://localhost:3000/api/health
+        - https://<%= @core_wh %>/api/health # change to valid hostname for your environment
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: localhost:9115  # The blackbox exporter's real hostname:port.
+#  - job_name: 'blackbox-secure-api-endpoints'
+#    metrics_path: /probe
+#    params:
+#      module: [http_2xx_auth]  #pointing to secure blackbox module
+#    static_configs:
+#      - targets:
+#        - https://api.securexyz.com/actuator/health    # Target to probe with https.
+#    relabel_configs:
+#      - source_labels: [__address__]
+#        target_label: __param_target
+#      - source_labels: [__param_target]
+#        target_label: instance
+#      - target_label: __address__
+#        replacement: localhost:9115  # The blackbox exporter's real hostname:port.
+      ## gather the metrics from third party json sources, via the json exporter
+      #  - job_name: json_api_response
+      #    metrics_path: /probe
+      #    static_configs:
+      #      - targets:
+      #          # URL of each API for json exporter
+      #          - https://core.example.com/api/health
+      #    relabel_configs:
+      #      - source_labels: [__address__]
+      #        target_label: __param_target
+      #      - source_labels: [__param_target]
+      #        target_label: instance
+      #      - target_label: __address__
+      #        # Location of the json exporter's real <hostname>:<port> from Prometheus
+      #        replacement: localhost:7979
+
+rule_files:
+  - 'rules.yml'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["localhost:9093"]

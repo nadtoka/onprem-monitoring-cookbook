@@ -1,0 +1,38 @@
+docker run \
+	--name=<%= @container_name %> \
+	<% unless @volumes.nil? -%>
+		<% @volumes.each do |val| -%>
+	--volume=<%= val.gsub("__", ":") %> \
+		<% end -%>
+	<% end -%>
+	<% unless @env.nil? -%>
+		<% @env.each do |val| -%>
+	--env=<%= val.gsub("__", ":") %> \
+		<% end -%>
+	<% end -%>
+	<% unless @extra_hosts.nil? -%>
+		<% @extra_hosts.each do |val| -%>
+	--add-host=<%= val.gsub("__", ":") %> \
+		<% end -%>
+	<% end -%>
+	--network=<%= @network_mode %> \
+	--pid=<%= @pid_mode %> \
+	<% unless @ports.nil? -%>
+		<% @ports.each do |val| -%>
+	-p=<%= val %> \
+		<% end -%>
+	<% end -%>
+	--restart=<%= @restart_policy %> \
+	<% unless @runtime.nil? -%>
+	--runtime=<%= @runtime %> \
+	<% end -%>
+	<% unless @shm_size.nil? -%>
+	--shm-size=<%= @shm_size %> \
+	<% end -%>
+	<% unless @ulimits.nil? -%>
+		<% @ulimits.each do |val| -%>
+	--ulimit <%= val %> \
+		<% end -%>
+	<% end -%>
+	--detach=true \
+	<%= @docker_image %>:<%= @docker_tag %> <% unless @command.nil? -%> <% @command.each do |val| -%> <%= val.gsub("__", ":") %> <% end -%> <% end -%>

@@ -1,0 +1,7 @@
+default['smtp']['user'] = ''
+default['smtp']['pwd'] = ''
+default['smtp']['port'] = '25'
+default['smtp']['host'] = ''
+default['smtp']['from'] = ''
+default['smtp']['to'] = ''
+default['smtp']['identity'] = ''

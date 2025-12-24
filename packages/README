@@ -1,0 +1,6 @@
+This directory is reserved for offline bundles of container images or package artifacts.
+
+To build an offline bundle:
+- Pull the required images listed in README.md.
+- Save them with `docker save` and move the tarballs into this directory.
+- Update your deployment documentation to point to the local bundle.
