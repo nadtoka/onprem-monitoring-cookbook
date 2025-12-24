@@ -7,7 +7,7 @@ version '0.1.0'
 chef_version '>= 15.0'
 
 depends 'nginx'
-#depends 'customization'
+# depends 'customization'
 depends 'line', '~> 4.4.4'
 
 # The `issues_url` points to the location where issues for this cookbook are

@@ -25,10 +25,7 @@ container_name = 'cadvisor'
 restart_policy = 'unless-stopped'
 
 # Hacky way to workaround strange ":" processing in list elements when passing to the template
-volumes_mod = []
-volumes.each do |val|
-  volumes_mod << val.gsub(':', '__')
-end
+volumes_mod = volumes.map { |val| val.gsub(':', '__') }
 
 template "/root/run_#{container_name}.sh" do
   mode '0755'
