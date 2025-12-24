@@ -8,12 +8,12 @@ name 'monitoring_vm'
 
 # Where to find external cookbooks:
 default_source :supermarket
-default_source :chef_repo, "../"
-default_source :chef_repo, "../" do |s|
-    s.preferred_for "nginx"
+default_source :chef_repo, '../'
+default_source :chef_repo, '../' do |s|
+  s.preferred_for 'nginx'
 end
-default_source :chef_repo, "../" do |s|
-    s.preferred_for "customization"
+default_source :chef_repo, '../' do |s|
+  s.preferred_for 'customization'
 end
 
 # run_list: chef-client will run these recipes in the order specified.

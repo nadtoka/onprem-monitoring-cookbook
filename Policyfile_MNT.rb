@@ -8,13 +8,13 @@ name 'monitoring_mnt'
 
 # Where to find external cookbooks:
 default_source :supermarket
-default_source :chef_repo, "../"
-default_source :chef_repo, "../" do |s|
-    s.preferred_for "nginx"
+default_source :chef_repo, '../'
+default_source :chef_repo, '../' do |s|
+  s.preferred_for 'nginx'
 end
 
 # run_list: chef-client will run these recipes in the order specified.
-run_list 'monitoring::docker','monitoring::node-exporter','monitoring::cadvisor'
+run_list 'monitoring::docker', 'monitoring::node-exporter', 'monitoring::cadvisor'
 
 # Specify a custom source for a single cookbook:
 cookbook 'monitoring', path: '.'

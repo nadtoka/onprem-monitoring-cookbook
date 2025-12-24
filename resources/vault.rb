@@ -1,4 +1,4 @@
-#TODO: Switch to https://docs.chef.io/infra_language/secrets/ (now in beta)
+# TODO: Switch to https://docs.chef.io/infra_language/secrets/ (now in beta)
 unified_mode true
 
 require 'vault'
