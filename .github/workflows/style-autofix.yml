@@ -1,6 +1,7 @@
+---
 name: Style Autofix
 
-on:
+"on":
   workflow_dispatch:
 
 jobs:
